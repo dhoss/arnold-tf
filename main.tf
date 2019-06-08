@@ -19,6 +19,11 @@ resource "heroku_app" "arnold" {
   ]
 }
 
+resource "heroku_addon" "database" {
+  app  = "${heroku_app.arnold.name}"
+  plan = "heroku-postgresql:hobby-basic"
+}
+
 output "arnold_app_url" {
   value = "https://${heroku_app.arnold.name}.herokuapp.com"
 }
