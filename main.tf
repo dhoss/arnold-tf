@@ -21,7 +21,7 @@ resource "heroku_app" "arnold" {
 
 resource "heroku_addon" "database" {
   app  = "${heroku_app.arnold.name}"
-  plan = "heroku-postgresql:hobby-basic"
+  plan = "heroku-postgresql:hobby-dev"
 }
 
 output "arnold_app_url" {
