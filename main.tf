@@ -49,11 +49,11 @@ resource "heroku_pipeline_coupling" "production" {
 }
 
 resource "heroku_addon" "database-stage" {
-  app  = "${heroku_app.arnold-stage.name}-stage"
+  app  = "${heroku_app.arnold-stage.name}"
   plan = "heroku-postgresql:hobby-dev"
 }
 
 resource "heroku_addon" "database-prod" {
-  app  = "${heroku_app.arnold-prod.name}-prod"
+  app  = "${heroku_app.arnold-prod.name}"
   plan = "heroku-postgresql:hobby-dev"
 }
