@@ -23,16 +23,32 @@ data "secrethub_secret" "discord-api-token-dev" {
   path  = "djaustin/arnold-fitness-bot/tokens/discord/dev:1"
 }
 
-resource "heroku_config" "discord-api-tokens" {
+data "secrethub_secret" "discord-api-token-prod" {
+  path  = "djaustin/arnold-fitness-bot/tokens/discord/prod:1"
+}
+
+resource "heroku_config" "discord-api-token-dev" {
     sensitive_vars = {
         DISCORD_API_TOKEN = "${data.secrethub_secret.discord-api-token-dev.value}"
+    }
+}
+
+resource "heroku_config" "discord-api-token-prod" {
+    sensitive_vars = {
+        DISCORD_API_TOKEN = "${data.secrethub_secret.discord-api-token-prod.value}"
     }
 }
 
 resource "heroku_app_config_association" "arnold-stage" {
   app_id = "${heroku_app.arnold-stage.id}"
 
-  sensitive_vars = "${heroku_config.discord-api-tokens.sensitive_vars}"
+  sensitive_vars = "${heroku_config.discord-api-token-prod.sensitive_vars}"
+}
+
+resource "heroku_app_config_association" "arnold-prod" {
+  app_id = "${heroku_app.arnold-prod.id}"
+
+  sensitive_vars = "${heroku_config.discord-api-token-prod.sensitive_vars}"
 }
 
 resource "heroku_app" "arnold-stage" {
