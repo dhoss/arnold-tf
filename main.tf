@@ -12,12 +12,25 @@ provider "heroku" {
   version = "~> 2.0"
 }
 
-variable "app_name" {
-  description = "Name of the Heroku app"
+variable "secrethub_passphrase" {}
+
+provider "secrethub" {
+  credential            = "${file("~/.secrethub/credential")}"
+  credential_passphrase = "${var.secrethub_passphrase}"
+}
+
+data "secrethub_secret" "discord-api-token-dev" {
+  path  = "djaustin/arnold-fitness-bot/tokens/discord/dev:1"
+}
+
+resource "heroku_config" "discord-api-tokens" {
+    sensitive_vars = {
+        token = "${data.secrethub_secret.discord-api-token-dev.value}"
+    }
 }
 
 resource "heroku_app" "arnold-stage" {
-  name = "${var.app_name}-stage"
+  name = "arnold-fitness-bot-stage"
   region = "us"
   buildpacks = [
       "heroku/java"
@@ -25,7 +38,7 @@ resource "heroku_app" "arnold-stage" {
 }
 
 resource "heroku_app" "arnold-prod" {
-  name = "${var.app_name}-prod"
+  name = "arnold-fitness-bot-prod"
   region = "us"
   buildpacks = [
       "heroku/java"
