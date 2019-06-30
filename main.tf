@@ -20,7 +20,7 @@ provider "secrethub" {
 }
 
 data "secrethub_secret" "discord-api-token-dev" {
-  path  = "djaustin/arnold-fitness-bot/tokens/discord/dev:1"
+  path  = "djaustin/arnold-fitness-bot/tokens/discord/dev:2"
 }
 
 data "secrethub_secret" "discord-api-token-prod" {
