@@ -29,6 +29,12 @@ resource "heroku_config" "discord-api-tokens" {
     }
 }
 
+resource "heroku_app_config_association" "arnold-stage" {
+  app_id = "${heroku_app.arnold-stage.id}"
+
+  sensitive_vars = "${heroku_config.discord-api-tokens.sensitive_vars}"
+}
+
 resource "heroku_app" "arnold-stage" {
   name = "arnold-fitness-bot-stage"
   region = "us"
