@@ -25,7 +25,7 @@ data "secrethub_secret" "discord-api-token-dev" {
 
 resource "heroku_config" "discord-api-tokens" {
     sensitive_vars = {
-        discord_token = "${data.secrethub_secret.discord-api-token-dev.value}"
+        DISCORD_API_TOKEN = "${data.secrethub_secret.discord-api-token-dev.value}"
     }
 }
 
