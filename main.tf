@@ -27,6 +27,11 @@ data "secrethub_secret" "discord-api-token-dev" {
 data "secrethub_secret" "discord-api-token-prod" {
   path  = "djaustin/arnold-fitness-bot/tokens/discord/prod:1"
 }
+
+
+data "secrethub_secret" "sentry-dsn" {
+  path  = "djaustin/arnold-fitness-bot/tokens/common/sentry:1"
+}
 ####
 
 #### CONFIG
@@ -42,29 +47,43 @@ resource "heroku_config" "discord-api-token-prod" {
     }
 }
 
-resource "heroku_config" "common-stage" {
-    vars = {
-        JVM_OPTS = "-Xmx300m -Xss512k -XX:CICompilerCount=2 -XX:+PrintGCDetails -XX:+UseConcMarkSweepGC -javaagent:/app/newrelic/newrelic.jar"
+resource "heroku_config" "sentry-dsn-dev" {
+    sensitive_vars = {
+        SENTRY_DSN = "${data.secrethub_secret.sentry-dsn.value}"
     }
 }
 
-resource "heroku_config" "common-prod" {
+resource "heroku_config" "sentry-dsn-stage" {
+    sensitive_vars = {
+        SENTRY_DSN = "${data.secrethub_secret.sentry-dsn.value}"
+    }
+}
+
+resource "heroku_config" "public-stage" {
     vars = {
-        JVM_OPTS = "-Xmx300m -Xss512k -XX:CICompilerCount=2 -XX:+PrintGCDetails -XX:+UseConcMarkSweepGC -javaagent:/app/newrelic/newrelic.jar"
+        JVM_OPTS = "-Xmx300m -Xss512k -XX:CICompilerCount=2 -XX:+PrintGCDetails -XX:+UseConcMarkSweepGC"
+        APP_USER = "arnold-stage"
+    }
+}
+
+resource "heroku_config" "public-prod" {
+    vars = {
+        JVM_OPTS = "-Xmx300m -Xss512k -XX:CICompilerCount=2 -XX:+PrintGCDetails -XX:+UseConcMarkSweepGC"
+        APP_USER = "arnold-prod"
     }
 }
 
 resource "heroku_app_config_association" "arnold-stage" {
   app_id = "${heroku_app.arnold-stage.id}"
 
-  vars = "${heroku_config.common-stage.vars}"
+  vars = "${heroku_config.public-stage.vars}"
   sensitive_vars = "${heroku_config.discord-api-token-dev.sensitive_vars}"
 }
 
 resource "heroku_app_config_association" "arnold-prod" {
   app_id = "${heroku_app.arnold-prod.id}"
 
-  vars = "${heroku_config.common-prod.vars}"
+  vars = "${heroku_config.public-prod.vars}"
   sensitive_vars = "${heroku_config.discord-api-token-prod.sensitive_vars}"
 }
 ####
@@ -116,6 +135,11 @@ resource "heroku_addon" "database-prod" {
 
 resource "heroku_addon" "sentry-stage" {
   app  = "${heroku_app.arnold-stage.name}"
+  plan = "sentry:f1"
+}
+
+resource "heroku_addon" "sentry-prod" {
+  app  = "${heroku_app.arnold-prod.name}"
   plan = "sentry:f1"
 }
 ####
