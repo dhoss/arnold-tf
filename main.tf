@@ -39,15 +39,29 @@ resource "heroku_config" "discord-api-token-prod" {
     }
 }
 
+resource "heroku_config" "common-stage" {
+    vars = {
+        JVM_OPTS = "-Xmx300m -Xss512k -XX:CICompilerCount=2 -XX:+PrintGCDetails -XX:+UseConcMarkSweepGC -javaagent:/app/newrelic/newrelic.jar"
+    }
+}
+
+resource "heroku_config" "common-prod" {
+    vars = {
+        JVM_OPTS = "-Xmx300m -Xss512k -XX:CICompilerCount=2 -XX:+PrintGCDetails -XX:+UseConcMarkSweepGC -javaagent:/app/newrelic/newrelic.jar"
+    }
+}
+
 resource "heroku_app_config_association" "arnold-stage" {
   app_id = "${heroku_app.arnold-stage.id}"
 
+  vars = "${heroku_config.common-stage.vars}"
   sensitive_vars = "${heroku_config.discord-api-token-dev.sensitive_vars}"
 }
 
 resource "heroku_app_config_association" "arnold-prod" {
   app_id = "${heroku_app.arnold-prod.id}"
 
+  vars = "${heroku_config.common-prod.vars}"
   sensitive_vars = "${heroku_config.discord-api-token-prod.sensitive_vars}"
 }
 
