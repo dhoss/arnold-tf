@@ -12,6 +12,7 @@ provider "heroku" {
   version = "~> 2.0"
 }
 
+#### SECRETS
 variable "secrethub_passphrase" {}
 
 provider "secrethub" {
@@ -26,7 +27,9 @@ data "secrethub_secret" "discord-api-token-dev" {
 data "secrethub_secret" "discord-api-token-prod" {
   path  = "djaustin/arnold-fitness-bot/tokens/discord/prod:1"
 }
+####
 
+#### CONFIG
 resource "heroku_config" "discord-api-token-dev" {
     sensitive_vars = {
         DISCORD_API_TOKEN = "${data.secrethub_secret.discord-api-token-dev.value}"
@@ -64,7 +67,9 @@ resource "heroku_app_config_association" "arnold-prod" {
   vars = "${heroku_config.common-prod.vars}"
   sensitive_vars = "${heroku_config.discord-api-token-prod.sensitive_vars}"
 }
+####
 
+#### PIPELINE STAGES
 resource "heroku_app" "arnold-stage" {
   name = "arnold-fitness-bot-stage"
   region = "us"
@@ -96,7 +101,9 @@ resource "heroku_pipeline_coupling" "production" {
   pipeline = "${heroku_pipeline.arnold-app.id}"
   stage    = "production"
 }
+####
 
+#### ADDONS
 resource "heroku_addon" "database-stage" {
   app  = "${heroku_app.arnold-stage.name}"
   plan = "heroku-postgresql:hobby-dev"
@@ -106,3 +113,9 @@ resource "heroku_addon" "database-prod" {
   app  = "${heroku_app.arnold-prod.name}"
   plan = "heroku-postgresql:hobby-dev"
 }
+
+resource "heroku_addon" "sentry-stage" {
+  app  = "${heroku_app.arnold-stage.name}"
+  plan = "sentry:f1"
+}
+####
